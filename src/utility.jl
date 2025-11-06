@@ -27,7 +27,8 @@ function defaultltspiceexecutable()
     possibleltspiceexecutablelocations = [
     "C:\\Program Files\\LTC\\LTspiceXVII\\XVIIx64.exe",
     "C:\\Program Files (x86)\\LTC\\LTspiceIV\\scad3.exe",
-    "C:\\Program Files\\LTC\\LTspiceIV\\scad3.exe"
+    "C:\\Program Files\\LTC\\LTspiceIV\\scad3.exe",
+    raw"C:\Program Files\ADI\LTspice\LTspice.exe"
     ]
   end
   @static if Sys.isapple()

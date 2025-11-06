@@ -1,9 +1,9 @@
 function test3()
   # copy test3 files to temp so we can test writing to them
-  cp("test3.asc","temp\\test3.asc",force = true)
-  cp("test3.log","temp\\test3.log",force = true)
+  cp(@__DIR__()*"/test3.asc",@__DIR__()*"/temp\\test3.asc",force = true)
+  cp(@__DIR__()*"/test3.log",@__DIR__()*"/temp\\test3.log",force = true)
 
-  filename = "temp\\test3.asc"
+  filename = @__DIR__()*"/temp\\test3.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
   sim = LTspiceSimulation(filename,executablepath="")
   @test LTspice.does_circuitfilearray_file_match(sim)

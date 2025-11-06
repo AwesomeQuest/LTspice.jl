@@ -14,22 +14,22 @@ end
 
 
 @testset "tests not calling LTspice.exe" begin
-  include("test1.jl")
-  include("test2.jl")
-  include("test3.jl")
-  include("test4.jl")
-  include("test5.jl")
-  include("test6.jl")
-  include("test7.jl")
-  include("test8.jl")
-  include("test9.jl")
-  include("test10.jl")
-  include("test11.jl")
-  include("test12.jl")
-  include("test13.jl")
-  include("test14.jl")
-  include("test15.jl")
-  include("testinc.jl")
+  include(@__DIR__()*"/test1.jl")
+  include(@__DIR__()*"/test2.jl")
+  include(@__DIR__()*"/test3.jl")
+  include(@__DIR__()*"/test4.jl")
+  include(@__DIR__()*"/test5.jl")
+  include(@__DIR__()*"/test6.jl")
+  include(@__DIR__()*"/test7.jl")
+  include(@__DIR__()*"/test8.jl")
+  include(@__DIR__()*"/test9.jl")
+  include(@__DIR__()*"/test10.jl")
+  include(@__DIR__()*"/test11.jl")
+  include(@__DIR__()*"/test12.jl")
+  include(@__DIR__()*"/test13.jl")
+  include(@__DIR__()*"/test14.jl")
+  include(@__DIR__()*"/test15.jl")
+  include(@__DIR__()*"/testinc.jl")
 end
 
 

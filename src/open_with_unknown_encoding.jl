@@ -18,7 +18,7 @@ end
 
 function iscorrectencoding_logfile(io)
   firstline = readline(io)
-  if firstline[1:nextind(firstline, 1, 7)] == "Circuit:"
+  if firstline[1:nextind(firstline, 1, 7)] == "Circuit:" || firstline[1:nextind(firstline, 1, 7)] == "LTspice "
     seekstart(io.stream) # good idea?
     return true
   else

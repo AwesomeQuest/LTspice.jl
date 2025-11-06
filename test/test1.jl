@@ -1,12 +1,12 @@
 function test1()
-  filename = "test1.asc"
+  filename = @__DIR__()*"/test1.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
   sim = LTspiceSimulation(filename,executablepath="")
   @test LTspice.does_circuitfilearray_file_match(sim)
   show(IOBuffer(),sim)
   @static if Sys.iswindows()
     (circuitdir,_filename) = splitdir(circuitpath(sim))
-    @test _filename == filename
+    @test @__DIR__()*"/"*_filename == filename
     (logdir,logfilename) = splitdir(logpath(sim))
     @test logdir == circuitdir
     @test executablepath(sim) == ""

@@ -1,5 +1,5 @@
 function test13()
-  filename = "test13.asc"
+  filename = @__DIR__()*"/test13.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
   sim = LTspiceSimulation(filename,executablepath="")
   @test LTspice.does_circuitfilearray_file_match(sim)

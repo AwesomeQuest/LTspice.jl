@@ -140,6 +140,7 @@ function parseline!(x::LTspiceSimulation, ::Duration, line::AbstractString)
 end
 
 function processlines!(io::IO, x::LTspiceSimulation, findlines=[], untillines=[])
+  #@debug copy(io.inbuf) |> String
   while ~eof(io)
     line = readline(io, keep=true)
     for f in findlines
