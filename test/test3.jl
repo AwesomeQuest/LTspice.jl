@@ -30,9 +30,9 @@ function test3()
   @test sim["l"]≈454.5
 
   # measurements
-  @test sim["x"]≈1.00394
-  @test sim["z"]≈0.019685
-  @test sim["y"]≈0.984252
+  @test sim["x"]≈1.003937006
+  @test sim["z"]≈0.0196850392967
+  @test sim["y"]≈0.984251976013
 
   for key in parameternames(sim)
     sim[key] = 1.0

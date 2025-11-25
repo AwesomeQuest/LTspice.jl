@@ -6,6 +6,7 @@ function test14()
   show(IOBuffer(),sim)
   @test measurementnames(sim) == ("m1",)
   @test parameternames(sim) == ("a","b","d", "e", "φ", "Ω", "this_is_a_long_name")
+  sim["m1"] ≈ 493.100006104
   return true
 end
 test14()
