@@ -19,5 +19,6 @@ function test2()
   @test(length(values(sim))==7)
   @test(length(sim)==7)
   show(IOBuffer(),sim)
+  return true
 end
 test2()

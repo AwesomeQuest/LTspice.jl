@@ -16,5 +16,6 @@ function test13()
   @test stepnames(sim) == teststepnames
   @test length(measurementvalues(sim)) == length(testmeasurementnames)*length(npnsteps)*length(v2steps)*length(v1steps)
   show(IOBuffer(),sim)
+  return true
 end
 test13()

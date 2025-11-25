@@ -4,13 +4,13 @@ using Test
 
 function localtests()
 
-  test1 = LTspiceSimulation("test1.asc",tempdir=true)
+  test1 = LTspiceSimulation(@__DIR__()*"/test1.asc",tempdir=true)
   v = 20.0
   r = 2.0
   i = test1(v,r)[1]
   @test i == 10.0
 
-  testinc1 = LTspiceSimulation("testInc1.asc",tempdir=true)
+  testinc1 = LTspiceSimulation(@__DIR__()*"/testInc1.asc",tempdir=true)
   @test testinc1["incA"] == 1.0
   @test testinc1["incB"] == 2.0
   @test testinc1["incC"] == 3.0
@@ -18,7 +18,7 @@ function localtests()
   @test testinc1["incE"] == 5.0
   @test testinc1["incF"] == 6.0
 
-  test14 = LTspiceSimulation("test14.asc",tempdir=true)
+  test14 = LTspiceSimulation(@__DIR__()*"/test14.asc",tempdir=true)
   testarray = [1.0,2.0]
   for a in testarray
     for b in 10*testarray

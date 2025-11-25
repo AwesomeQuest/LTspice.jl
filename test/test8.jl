@@ -21,5 +21,6 @@ function test8()
   @test sim["y_x"] == 11.0
 
   show(IOBuffer(),sim)
+  return true
 end
 test8()

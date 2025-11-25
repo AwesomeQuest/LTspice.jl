@@ -35,5 +35,6 @@ function test1()
   sim["Vin"] = 1.0
   @test sim["Vin"] == 1.0
   sim["Vin"] = 5.0
+  return true
 end
 test1()

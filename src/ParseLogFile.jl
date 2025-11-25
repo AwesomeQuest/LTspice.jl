@@ -140,7 +140,6 @@ function parseline!(x::LTspiceSimulation, ::Duration, line::AbstractString)
 end
 
 function processlines!(io::IO, x::LTspiceSimulation, findlines=[], untillines=[])
-  #@debug copy(io.inbuf) |> String
   while ~eof(io)
     line = readline(io, keep=true)
     for f in findlines
@@ -158,7 +157,7 @@ function processlines!(io::IO, x::LTspiceSimulation, findlines=[], untillines=[]
 end
 
 function parselog!(x::NonSteppedSimulation{Nparam,Nmeas}) where {Nparam,Nmeas}
-  open(x.logpath,x.logfileencoding) do io
+  open(x.logpath) do io
     measurement = MeasurementValue(x)
     exitcode = processlines!(io, x, [], [measurement,IsDotStep()])
     if exitcode == 2 # this was supposed to be a NonSteppedFile
@@ -172,7 +171,7 @@ function parselog!(x::NonSteppedSimulation{Nparam,Nmeas}) where {Nparam,Nmeas}
 end
 
 function parselog!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam,Nmeas,Nmdim,Nstep}
-  open(x.logpath,x.logfileencoding) do io
+  open(x.logpath) do io
     dotstep = DotStep(x)
     measurementname = MeasurementName(x)
     processlines!(io, x, [dotstep],[measurementname])

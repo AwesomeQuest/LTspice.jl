@@ -25,5 +25,6 @@ function test6()
   end
 
   show(IOBuffer(),sim)
+  return true
 end
 test6()

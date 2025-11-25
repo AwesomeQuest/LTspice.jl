@@ -35,5 +35,6 @@ function test5()
   end
 
   show(IOBuffer(),sim)
+  return true
 end
 test5()

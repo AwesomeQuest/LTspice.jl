@@ -33,5 +33,6 @@ function test7()
   @test sim["u"] == 1e-15
   @test sim["v"] == 1e-15
   show(IOBuffer(),sim)
+  return true
 end
 test7()

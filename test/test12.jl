@@ -24,5 +24,6 @@ function test12()
   (header,state) = iterate(pli)
   @test header == ("V1","b","c","a")
   show(IOBuffer(),sim)
+  return true
 end
 test12()

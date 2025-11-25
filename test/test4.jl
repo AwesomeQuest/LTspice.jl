@@ -41,5 +41,6 @@ function test4()
   end
 
   show(IOBuffer(),sim)
+  return true
 end
 test4()

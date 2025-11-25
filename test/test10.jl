@@ -5,5 +5,6 @@ function test10()
   @test sim["m1"] == 0.0
   @test isnan(sim["bad_meas"])
   show(IOBuffer(),sim)
+  return true
 end
 test10()

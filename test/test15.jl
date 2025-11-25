@@ -6,5 +6,6 @@ function test15()
   show(IOBuffer(),sim)
   @test measurementnames(sim) == ("σ", "a", "ψπππππ")
   @test parameternames(sim) == ("m", "μ", "MEG", "Ω", "θ", "Δ", "Φ", "ψ")
+  return true
 end
 test15()

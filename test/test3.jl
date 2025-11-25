@@ -52,5 +52,6 @@ function test3()
     @test sim_b[key]≈2.0
   end
   show(IOBuffer(),sim_b)
+  return true
 end
 test3()
