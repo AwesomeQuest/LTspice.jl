@@ -8,9 +8,9 @@ function test2()
   @test sim["b"]≈8.0
   @test sim["a"]≈10.0
   @test sim["d"]≈100.0
-  @test sim["x"]≈1.00394
-  @test sim["z"]≈0.019685
-  @test sim["y"]≈0.984252
+  @test sim["x"]≈1.003937006
+  @test sim["z"]≈0.0196850392967
+  @test sim["y"]≈0.984251976013
 
   @test(length(measurementvalues(sim))==3)
   @test(length(parametervalues(sim))==4)
