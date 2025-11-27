@@ -87,34 +87,32 @@ const dotstepregex = r"(\.step)(?:\s+(.*?)=(.*?))(?:\s+(.*?)=(.*?)){0,1}(?:\s+(.
 function parseline!(::LTspiceSimulation, ::IsDotStep, line::AbstractString)
   occursin(dotstepregex, line)
 end
-const dotstepregex123 = (
-  r"\.step\s+(?:.*?)=(.*?)\s*$"i,
-  r"\.step\s+(?:.*?)=(.*?)\s+(?:.*?)=(.*?)\s*$"i,
-  r"\.step\s+(?:.*?)=(.*?)\s+(?:.*?)=(.*?)\s+(?:.*?)=(.*?)\s*$"i
-  )
-@generated function parseline!(
+
+function parseline!(
                   x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
                   ds::DotStep{Nstep},
                   line::AbstractString) where {Nparam,Nmeas,Nmdim,Nstep}
-  return quote
-    m = match($(dotstepregex123[Nstep]), line)
-    m == nothing && return false
-    (ds.newline,ds.lastline) = (ds.lastline,ds.newline)
-    for i in 1:$Nstep
-      if ~ds.isdone[i]
-        ds.newline[i] = parse(Float64,m.captures[i])
-      end
+  
+  dotstepregexnstep = r"\.step"i * 
+        prod((r"\s+(?:.*?)=(.*?)"i for i in 1:Nstep), init=r""i) *
+        r"\s*$"i
+  m = match(dotstepregexnstep, line)
+  m === nothing && return false
+  (ds.newline,ds.lastline) = (ds.lastline,ds.newline)
+  for i in 1:$Nstep
+    if ~ds.isdone[i]
+      ds.newline[i] = parse(Float64,m.captures[i])
     end
-    for i in 1:$Nstep
-      if ds.newline[i+1] != ds.lastline[i+1] && ~isnan(ds.lastline[i]) && ~isnan(ds.newline[i+1])
-        ds.isdone[i] = true
-      end
-      if ~ds.isdone[i] && ds.newline[i] != ds.lastline[i]
-        push!(ds.stepvalues.values[i],ds.newline[i])
-      end
-    end
-    return true
   end
+  for i in 1:$Nstep
+    if ds.newline[i+1] != ds.lastline[i+1] && ~isnan(ds.lastline[i]) && ~isnan(ds.newline[i+1])
+      ds.isdone[i] = true
+    end
+    if ~ds.isdone[i] && ds.newline[i] != ds.lastline[i]
+      push!(ds.stepvalues.values[i],ds.newline[i])
+    end
+  end
+  return true
 end
 
 const dateregex = r"Start Time:\s*(.*?)\s*$"

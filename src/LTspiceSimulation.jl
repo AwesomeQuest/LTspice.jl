@@ -314,24 +314,17 @@ function Base.values(x::LTspiceSimulation)
   end
   return allvalues
 end
-@generated function Base.getindex(
+function Base.getindex(
         x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
         key::AbstractString) where {Nparam,Nmeas,Nmdim,Nstep}
-  r = (
-      :(x.measurementvalues[x.measurementdict[key]]),
-      :(x.measurementvalues[:,x.measurementdict[key]]),
-      :(x.measurementvalues[:,:,x.measurementdict[key]]),
-      :(x.measurementvalues[:,:,:,x.measurementdict[key]])
-      )
-  return quote
-    if haskey(x.parameterdict,key)
-      return x.parametervalues[x.parameterdict[key]]
-    elseif haskey(x.measurementdict,key)
-      run!(x)
-      return $(r[Nstep+1])
-    else
-      throw(KeyError(key))
-    end
+  
+  if haskey(x.parameterdict,key)
+    return x.parametervalues[x.parameterdict[key]]
+  elseif haskey(x.measurementdict,key)
+    run!(x)
+    return x.measurementvalues[ntuple(_->(:), Nstep)..., x.measurementdict[key]]
+  else
+    throw(KeyError(key))
   end
 end
 function Base.get(x::LTspiceSimulation, key::AbstractString, default)
