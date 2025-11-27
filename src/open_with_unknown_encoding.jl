@@ -28,7 +28,7 @@ end
 
 function tryopen!(fname::AbstractString, enc::PossibleEncodings, i)
   try_io = open(fname,enc.encodings[i])
-  if try_io!=nothing
+  if try_io!==nothing
     if enc.iscorrectencoding(try_io)
       enc.io = try_io
       return true

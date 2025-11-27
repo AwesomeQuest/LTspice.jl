@@ -39,7 +39,7 @@ end
 const nonsteppedmeasurementregex = r"^.*:.*=([\S]+)"i
 function parseline!(x::NonSteppedSimulation, mv::MeasurementValue, line::AbstractString)
   m = match(nonsteppedmeasurementregex, line)
-  m == nothing && return false
+  m === nothing && return false
   i = popfirst!(mv.iter)
   #(es=iterate(mv.iter,mv.state))==nothing && throw(ErrorException("unexpected measurement"))
   #(i,mv.state) = es
@@ -56,7 +56,7 @@ end
 const steppedmeasurementregex = r"^\s*[0-9]+\s+(\S+)"i
 function parseline!(x::LTspiceSimulation, mv::MeasurementValue, line::AbstractString)
   m = match(steppedmeasurementregex, line)
-  m == nothing && return false
+  m === nothing && return false
   i = popfirst!(mv.iter)
   #(es=iterate(mv.iter,mv.state))==nothing && throw(ErrorException("unexpected measurement"))
   #(i,mv.state) = es
@@ -73,7 +73,7 @@ end
 const measurementnameregex = r"^Measurement: ([a-z0-9_@#$.:\\]*)"
 function parseline!(x::LTspiceSimulation, mn::MeasurementName, line::AbstractString)
   m = match(measurementnameregex, line)
-  m == nothing && return false
+  m === nothing && return false
   i = popfirst!(mn.iter)
   #(es=iterate(mn.iter,mn.state))==nothing && throw(ErrorException("unexpected measurement"))
   #(i,mn.state) = es
@@ -120,7 +120,7 @@ end
 const dateregex = r"Date:\s*(.*?)\s*$"
 function parseline!(x::LTspiceSimulation, ::Date, line::AbstractString)
   m = match(dateregex,line)
-  if m!=nothing
+  if m!==nothing
     x.status.timestamp = DateTime(m.captures[1],"e u d HH:MM:SS yyyy")
     return true
   else
@@ -131,7 +131,7 @@ end
 const durationregex = r"Total[ ]elapsed[ ]time:\s*([\w.]+)\s+seconds.\s*$"
 function parseline!(x::LTspiceSimulation, ::Duration, line::AbstractString)
   m = match(durationregex, line)
-  if m!=nothing
+  if m!==nothing
     x.status.duration = parse(Float64,m.captures[1])
     return true
   else

@@ -9,3 +9,4 @@ scratch?.jl
 .ipynb_checkpoints
 test/Project.toml
 test/Manifest.toml
+.vscode/settings.json

@@ -92,13 +92,13 @@ parametercaptureregex offsets
 =#
 function parsecard!(cp::CircuitParsed, ::Parameter, card::AbstractString)
   m = match(parameterregex, card)
-  m == nothing && return false
+  m === nothing && return false
   currentposition = m.offsets[1]
   push!(cp.circuitfilearray,card[1:currentposition-1])
-  while currentposition<lastindex(card) && m!=nothing
+  while currentposition<lastindex(card) && m!==nothing
 #    println("      parameter: ",card[currentposition:end])
     m = match(parametercaptureregex,card,currentposition)
-    if m!=nothing
+    if m!==nothing
       pushnamevalue!(cp,m,currentposition,card)
       currentposition = m.offsets[6]
     else
@@ -132,14 +132,14 @@ function pushnamevalue!(cp::CircuitParsed,
   push!(cp.parametermultiplier, multiplier)
   index_circuitfilearray = length(cp.circuitfilearray)
   push!(cp.parameterindex, index_circuitfilearray)
-  unit != nothing && push!(cp.circuitfilearray,unit)
+  unit !== nothing && push!(cp.circuitfilearray,unit)
   push!(cp.circuitfilearray,to_end)
 end
 
 const measureregex = r"[.](?:measure|meas)[ ]+(?:ac |dc |op |tran |tf |noise ){0,1}[ ]*([^\d ][^ =]*)[ ]+"ix
 function parsecard!(cp::CircuitParsed, ::Measure, card::AbstractString)
     m = match(measureregex, card)
-    if m == nothing # exit if not a measure card
+    if m === nothing # exit if not a measure card
         return false
     end
     name = m.captures[1]
@@ -151,9 +151,9 @@ const step1regex = r"[.](?:step)[ ]+(?:oct |param ){0,1}[ ]*([^\d ][^ =]*)[ ]+(?
 const step2regex = r"[.](?:step)[ ]+(?:\w+)[ ]+(\w+[(]\w+[)])[ ]+"ix
 function parsecard!(cp::CircuitParsed, ::Step, card::AbstractString)
     m = match(step1regex, card)
-    if m == nothing
+    if m === nothing
         m = match(step2regex, card)
-        if m == nothing
+        if m === nothing
             return false # exit if not a step card
         end
     end
@@ -166,7 +166,7 @@ const includeregex = r"""(?:.include|.inc)[ ]+
                           [\"]{0,1}(.*?)[\"]{0,1}(?:\\n|\r|$)"""ix
 function parsecard!(cp::CircuitParsed, ::Include, card::AbstractString)
   m = match(includeregex, card)
-  m == nothing && return false
+  m === nothing && return false
   incabspath = absolutepath(cp.includesearchpath,m.captures[1])
   push!(cp.circuitfilearray,replace(card,m.captures[1] => incabspath))
   return true
@@ -175,7 +175,7 @@ const libraryregex = r"""(?:.lib)[ ]+
                           [\"]{0,1}(.*?)[\"]{0,1}(?:\\n|\r|$)"""ix
 function parsecard!(cp::CircuitParsed, ::Library, card::AbstractString)
   m = match(libraryregex, card)
-  m == nothing && return false
+  m === nothing && return false
   libabspath = absolutepath(cp.librarysearchpath,m.captures[1])
   push!(cp.circuitfilearray,replace(card,m.captures[1] => libabspath))
   return true

@@ -33,7 +33,7 @@ end
 end
 
 
-is_ltspice_installed = (try LTspice.defaultltspiceexecutable() catch nothing end)!=nothing
+is_ltspice_installed = (try LTspice.defaultltspiceexecutable() catch nothing end)!==nothing
 
 if is_ltspice_installed
   @testset "tests calling LTspice.exe" begin
