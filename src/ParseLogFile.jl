@@ -117,7 +117,7 @@ const dotstepregex123 = (
   end
 end
 
-const dateregex = r"Date:\s*(.*?)\s*$"
+const dateregex = r"Start Time:\s*(.*?)\s*$"
 function parseline!(x::LTspiceSimulation, ::Date, line::AbstractString)
   m = match(dateregex,line)
   if m!==nothing
@@ -159,13 +159,12 @@ end
 function parselog!(x::NonSteppedSimulation{Nparam,Nmeas}) where {Nparam,Nmeas}
   open(x.logpath) do io
     measurement = MeasurementValue(x)
-    exitcode = processlines!(io, x, [], [measurement,IsDotStep()])
+    exitcode = processlines!(io, x, [Date(), Duration()], [measurement,IsDotStep()])
     if exitcode == 2 # this was supposed to be a NonSteppedFile
       throw(ErrorException(".log file is not expected mutable struct.  expected non-stepped, got stepped"))
     end
-    processlines!(io, x, [measurement], [Date()])
+    processlines!(io, x, [measurement], [])
     #done(measurement.iter, measurement.state) || throw(ErrorException("missing measurement(s)"))
-    processlines!(io, x, [Duration()])
   end
   return nothing
 end
@@ -174,7 +173,8 @@ function parselog!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
   open(x.logpath) do io
     dotstep = DotStep(x)
     measurementname = MeasurementName(x)
-    processlines!(io, x, [dotstep],[measurementname])
+    processlines!(io, x, [Date()],[dotstep])
+    processlines!(io, x, [dotstep],[Duration()])
     x.stepvalues.values = dotstep.stepvalues.values
     measurementarraysize = (ntuple(i->length(dotstep.stepvalues.values[i]),Nstep)...,Nmeas)
     if measurementarraysize != size(x.measurementvalues)
@@ -184,7 +184,6 @@ function parselog!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
     processlines!(io, x, [measurementvalue,measurementname], [Date()])
     #iterate(measurmentvalue.iter,measurmentvalue.state)==nothing || throw(ErrorException("missing measurements"))
     #done(measurementvalue.iter,measurementvalue.state) || throw(ErrorException("missing measurements"))
-    processlines!(io, x, [Duration()])
   end
   return nothing
 end
