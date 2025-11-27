@@ -99,12 +99,12 @@ function parseline!(
   m = match(dotstepregexnstep, line)
   m === nothing && return false
   (ds.newline,ds.lastline) = (ds.lastline,ds.newline)
-  for i in 1:$Nstep
+  for i in 1:Nstep
     if ~ds.isdone[i]
       ds.newline[i] = parse(Float64,m.captures[i])
     end
   end
-  for i in 1:$Nstep
+  for i in 1:Nstep
     if ds.newline[i+1] != ds.lastline[i+1] && ~isnan(ds.lastline[i]) && ~isnan(ds.newline[i+1])
       ds.isdone[i] = true
     end
