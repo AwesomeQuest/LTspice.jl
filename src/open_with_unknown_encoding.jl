@@ -18,8 +18,16 @@ end
 
 function iscorrectencoding_logfile(io)
 	firstline = readline(io)
-	if firstline[1:nextind(firstline, 1, 7)] == "Circuit:" || firstline[1:nextind(firstline, 1, 7)] == "LTspice "
-		seekstart(io.stream) # good idea?
+	if occursin("Circuit: ", firstline) || occursin("LTspice ", firstline)
+		return true
+	else
+		return false
+	end
+end
+
+function iscorrectencoding_rawfile(io)
+	firstline = readline(io)
+	if occursin("Title: ", firstline)
 		return true
 	else
 		return false
@@ -30,7 +38,8 @@ function tryopen!(fname::AbstractString, enc::PossibleEncodings, i)
 	try_io = open(fname,enc.encodings[i])
 	if try_io!==nothing
 		if enc.iscorrectencoding(try_io)
-			enc.io = try_io
+			close(try_io.stream)  # ???
+			enc.io = open(fname,enc.encodings[i])
 			return true
 		else
 			close(try_io.stream)  # ???
