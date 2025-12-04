@@ -2,34 +2,25 @@ using LTspice
 using Test
 using Dates
 
-function compare_arrays(x,y)
-  @test length(x) == length(y)
-  for i in eachindex(x)
-    if !isnan(x[i])
-      @test x[i]≈y[i]
-    end
-  end
-  return nothing
-end
-
-
 @testset "tests not calling LTspice.exe" begin
-  include(@__DIR__()*"/test1.jl")
-  @test include(@__DIR__()*"/test2.jl")
-  @test include(@__DIR__()*"/test3.jl")
-  @test include(@__DIR__()*"/test4.jl")
-  @test include(@__DIR__()*"/test5.jl")
-  @test include(@__DIR__()*"/test6.jl")
-  @test include(@__DIR__()*"/test7.jl")
-  @test include(@__DIR__()*"/test8.jl")
-  @test include(@__DIR__()*"/test9.jl")
-  @test include(@__DIR__()*"/test10.jl")
-  @test include(@__DIR__()*"/test11.jl")
-  @test include(@__DIR__()*"/test12.jl")
-  @test include(@__DIR__()*"/test13.jl")
-  @test include(@__DIR__()*"/test14.jl")
-  @test include(@__DIR__()*"/test15.jl")
-  @test include(@__DIR__()*"/testinc.jl")
+  @testset "/test1.jl" include(@__DIR__()*"/test1.jl")
+  @testset "/test2.jl" include(@__DIR__()*"/test2.jl")
+  @testset "/test3.jl" include(@__DIR__()*"/test3.jl")
+  @testset "/test4.jl" include(@__DIR__()*"/test4.jl")
+  @testset "/test5.jl" include(@__DIR__()*"/test5.jl")
+  @testset "/test6.jl" include(@__DIR__()*"/test6.jl")
+  @testset "/test7.jl" include(@__DIR__()*"/test7.jl")
+  @testset "/test8.jl" include(@__DIR__()*"/test8.jl")
+  @testset "/test9.jl" include(@__DIR__()*"/test9.jl")
+  @testset "/test10.jl" include(@__DIR__()*"/test10.jl")
+  @testset "/test11.jl" include(@__DIR__()*"/test11.jl")
+  @testset "/test12.jl" include(@__DIR__()*"/test12.jl")
+  @testset "/test13.jl" include(@__DIR__()*"/test13.jl")
+  @testset "/test14.jl" include(@__DIR__()*"/test14.jl")
+  @testset "/test15.jl" include(@__DIR__()*"/test15.jl")
+  @testset "/test16.jl" include(@__DIR__()*"/test16.jl")
+  @testset "/test17.jl" include(@__DIR__()*"/test17.jl")
+  @testset "/testinc.jl" include(@__DIR__()*"/testinc.jl")
 end
 
 

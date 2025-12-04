@@ -1,7 +1,10 @@
+using LTspcie,Test
+
 function test3()
   # copy test3 files to temp so we can test writing to them
   cp(@__DIR__()*"/test3.asc",@__DIR__()*"/temp\\test3.asc",force = true)
   cp(@__DIR__()*"/test3.log",@__DIR__()*"/temp\\test3.log",force = true)
+  cp(@__DIR__()*"/test3.raw",@__DIR__()*"/temp\\test3.raw",force = true)
 
   filename = @__DIR__()*"/temp\\test3.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
