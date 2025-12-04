@@ -1,3 +1,5 @@
+using LTspice, Test
+
 function test1()
   filename = @__DIR__()*"/test1.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
@@ -37,4 +39,4 @@ function test1()
   sim["Vin"] = 5.0
   return true
 end
-test1()
+@testset test1()

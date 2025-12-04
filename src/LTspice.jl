@@ -2,6 +2,7 @@
 
 "Main module for `LTspice.jl` - a Julia interface to LTspice"
 module LTspice
+using LinearAlgebra
 using StringEncodings
 using Dates: DateTime
 import IterTools.chain
@@ -13,5 +14,6 @@ include("ParseCircuitFile.jl")
 include("ParseLogFile.jl")
 include("perlineiterator.jl")
 include("utility.jl")
+include("ParseRawFile.jl")
 
 end # module

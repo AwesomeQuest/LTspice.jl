@@ -1,11 +1,11 @@
-LTspice 24.1.10 for Windows
-Circuit: c:\Users\torfi\Documents\ProgrammingFun\LTspice.jl\othertests\test13.net
-Start Time: Tue Nov 25 21:35:25 2025
+LTspice 24.1.9 for Windows
+Circuit: c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\test13.net
+Start Time: Thu Dec  4 17:07:27 2025
 solver = Normal
-Maximum thread count: 20
+Maximum thread count: 8
 tnom = 27
 temp = 27
-method = modified trap
+method = trap
 Direct Newton iteration for .op point succeeded.
 .step 2n2222(vaf)=50 v2=10 v1=1
 .step 2n2222(vaf)=75 v2=10 v1=1
@@ -37,10 +37,10 @@ Direct Newton iteration for .op point succeeded.
 .step 2n2222(vaf)=50 v2=30 v1=2
 .step 2n2222(vaf)=75 v2=30 v1=2
 .step 2n2222(vaf)=100 v2=30 v1=2
-Total elapsed time: 1.611 seconds.
+Total elapsed time: 2.615 seconds.
 
 Files loaded:
-c:\Users\torfi\Documents\ProgrammingFun\LTspice.jl\othertests\test13.net
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\test13.net
 C:\Users\torfi\AppData\Local\LTspice\lib\cmp\standard.bjt
 
 

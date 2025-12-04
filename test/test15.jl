@@ -1,12 +1,14 @@
+using LTspcie,Test
+
 function test15()
-  filename = @__DIR__()*"/test15.asc"
-  # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
-  sim = LTspiceSimulation(filename,executablepath="")
-  @test LTspice.does_circuitfilearray_file_match(sim)
-  show(IOBuffer(),sim)
-  @test measurementnames(sim) == ("σ", "a", "ψπππππ")
-  @test parameternames(sim) == ("m", "μ", "MEG", "Ω", "θ", "Δ", "Φ", "ψ")
-  @test measurementvalues(sim) == [4.5e-5, 1.0, 4.0]
-  return true
+	filename = @__DIR__()*"/test15.asc"
+	# exectuablepath = null string will not run LTspice.exe.  Test parsing only.
+	sim = LTspiceSimulation(filename,executablepath="")
+	@test LTspice.does_circuitfilearray_file_match(sim)
+	show(IOBuffer(),sim)
+	@test measurementnames(sim) == ("σ", "a", "ψπππππ")
+	@test parameternames(sim) == ("m", "μ", "MEG", "Ω", "θ", "Δ", "Φ", "ψ")
+	@test measurementvalues(sim) == [4.5e-5, 1.0, 4.0]
+	return true
 end
-test15()
+@testset test15()

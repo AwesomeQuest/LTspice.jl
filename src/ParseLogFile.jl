@@ -70,7 +70,7 @@ function parseline!(x::LTspiceSimulation, mv::MeasurementValue, line::AbstractSt
 	return true
 end
 
-const measurementnameregex = r"^Measurement: ([a-z0-9_@#$.:\\]*)"
+const measurementnameregex = r"^Measurement: ([\S_@#$.:\\]*)"
 function parseline!(x::LTspiceSimulation, mn::MeasurementName, line::AbstractString)
 	m = match(measurementnameregex, line)
 	m === nothing && return false
@@ -119,7 +119,11 @@ const dateregex = r"Start Time:\s*(.*?)\s*$"
 function parseline!(x::LTspiceSimulation, ::Date, line::AbstractString)
 	m = match(dateregex,line)
 	if m!==nothing
-		x.status.timestamp = DateTime(m.captures[1],"e u d HH:MM:SS yyyy")
+		try
+			x.status.timestamp = DateTime(m.captures[1],"e u d HH:MM:SS yyyy")
+		catch
+			x.status.timestamp = DateTime(m.captures[1],"e u  d HH:MM:SS yyyy")
+		end
 		return true
 	else
 		return false
@@ -155,7 +159,7 @@ function processlines!(io::IO, x::LTspiceSimulation, findlines=[], untillines=[]
 end
 
 function parselog!(x::NonSteppedSimulation{Nparam,Nmeas}) where {Nparam,Nmeas}
-	open(x.logpath) do io
+	open(x.logpath, x.logfileencoding) do io
 		measurement = MeasurementValue(x)
 		exitcode = processlines!(io, x, [Date(), Duration()], [measurement,IsDotStep()])
 		if exitcode == 2 # this was supposed to be a NonSteppedFile
@@ -168,7 +172,7 @@ function parselog!(x::NonSteppedSimulation{Nparam,Nmeas}) where {Nparam,Nmeas}
 end
 
 function parselog!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam,Nmeas,Nmdim,Nstep}
-	open(x.logpath) do io
+	open(x.logpath, x.logfileencoding) do io
 		dotstep = DotStep(x)
 		measurementname = MeasurementName(x)
 		processlines!(io, x, [Date()],[dotstep])

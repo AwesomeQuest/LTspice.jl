@@ -147,8 +147,8 @@ function parsecard!(cp::CircuitParsed, ::Measure, card::AbstractString)
 	push!(cp.circuitfilearray, card)
 	return true
 end
-const step1regex = r"[.](?:step)[ ]+(?:oct |param ){0,1}[ ]*([^\d ][^ =]*)[ ]+(?:list ){0,1}[ ]*[0-9.e+-]+[a-z]*[ ]+"ix
-const step2regex = r"[.](?:step)[ ]+(?:\w+)[ ]+(\w+[(]\w+[)])[ ]+"ix
+const step1regex = r"[.](?:step)[ ]+(?:oct |dec ){0,1}(?:oct |dec |param ){0,1}[ ]*([^\d ][^ =]*)[ ]+(?:list ){0,1}[ ]*[0-9.e+-]+[a-z]*[ ]+"i
+const step2regex = r"[.](?:step)[ ]+(?:\w+)[ ]+(\w+[(]\w+[)])[ ]+"i
 function parsecard!(cp::CircuitParsed, ::Step, card::AbstractString)
 	m = match(step1regex, card)
 	if m === nothing

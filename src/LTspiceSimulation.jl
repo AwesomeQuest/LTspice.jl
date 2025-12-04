@@ -3,6 +3,7 @@ export circuitpath, logpath, executablepath
 export parameternames, parametervalues
 export measurementnames, measurementvalues
 export stepnames, stepvalues
+export flags, tracedata, tracenames
 export run!
 
 mutable struct Status
@@ -60,6 +61,8 @@ struct LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}
 	status :: Status
 	circuitfileencoding
 	logfileencoding
+	rawfileencoding
+	rawfileparsed
 end
 NonSteppedSimulation{Nparam,Nmeas} = LTspiceSimulation{Nparam,Nmeas,1,0}
 
@@ -158,6 +161,18 @@ function stepvalues(x::LTspiceSimulation)
 	run!(x) # step values can be a function of parameters
 	x.stepvalues.values
 end
+function flags(x::LTspiceSimulation)
+	run!(x)
+	x.rawfileparsed.flags
+end
+function tracenames(x::LTspiceSimulation)
+	run!(x)
+	x.rawfileparsed.tracenames
+end
+function tracedata(x::LTspiceSimulation)
+	run!(x)
+	x.rawfileparsed.tracedata
+end
 
 LTspiceSimulation(circuitpath::AbstractString;
 				executablepath::AbstractString = defaultltspiceexecutable(),
@@ -191,6 +206,10 @@ function LTspiceSimulation(circuitpath::AbstractString,
 	for i in eachindex(circuitparsed.measurementnames)
 		measurementdict[circuitparsed.measurementnames[i]] = i
 	end
+
+	temprawparsed = RawParsed(circuitpath[1:end-3]*"raw")
+	temprawparsed.tracenames = []
+	temprawparsed.tracedict = Dict{AbstractString, Int}()
 	return LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}(
 		circuitpath,
 		logpath(circuitpath),
@@ -208,7 +227,9 @@ function LTspiceSimulation(circuitpath::AbstractString,
 		blankstepvalues(Nstep),
 		Status(),
 		circuitparsed.circuitfileencoding,
-		PossibleEncodings([enc"UTF-16LE",enc"UTF-8",enc"windows-1252"],iscorrectencoding_logfile) # logfileencoding(executablepath) # LTspice changed?
+		PossibleEncodings([enc"UTF-16LE",enc"UTF-8",enc"windows-1252"],iscorrectencoding_logfile), # logfileencoding(executablepath) # LTspice changed?
+		PossibleEncodings([enc"UTF-16LE",enc"UTF-8",enc"windows-1252"],iscorrectencoding_rawfile), # logfileencoding(executablepath) # LTspice changed?
+		temprawparsed
 	)
 end
 
@@ -228,6 +249,8 @@ function Base.show(io::IO, x::LTspiceSimulation)
 	showmeasurements(io,x)
 	showsteps(io,x)
 	showtimeduration(io,x)
+	showflags(io,x)
+	showtracenames(io,x)
 end
 
 function showcircuitpath(io::IO, x::LTspiceSimulation)
@@ -301,6 +324,16 @@ function showtimeduration(io::IO, x::LTspiceSimulation)
 	end
 end
 
+function showtracenames(io::IO, x::LTspiceSimulation)
+	x.rawfileparsed.parsed || return nothing
+	println(io,"Traces = ", x.rawfileparsed.tracenames)
+end
+
+function showflags(io::IO, x::LTspiceSimulation)
+	x.rawfileparsed.parsed || return nothing
+	println(io,"Flags = ", x.rawfileparsed.flags)
+end
+
 Base.haskey(x::LTspiceSimulation, key::AbstractString) =
 	haskey(x.parameterdict,key) || haskey(x.measurementdict,key)
 Base.keys(x::LTspiceSimulation) =
@@ -320,13 +353,60 @@ function Base.getindex(
 	
 	if haskey(x.parameterdict,key)
 		return x.parametervalues[x.parameterdict[key]]
+	end
+
+	run!(x)
+	if key == "time" || key == "frequency"
+		return x.rawfileparsed.time_series
 	elseif haskey(x.measurementdict,key)
-		run!(x)
 		return x.measurementvalues[ntuple(_->(:), Nstep)..., x.measurementdict[key]]
+	elseif haskey(x.rawfileparsed.tracedict,key)
+		Nstep == 0 && return x.rawfileparsed.tracedata[x.rawfileparsed.tracedict[key], :]
+		return map(x.rawfileparsed.tracedata) do runstep
+			@view runstep[x.rawfileparsed.tracedict[key], :]
+		end
 	else
 		throw(KeyError(key))
 	end
 end
+
+function Base.getindex(
+		x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
+		tracekey::AbstractString,
+		inds::Integer...) where {Nparam,Nmeas,Nmdim,Nstep}
+	@assert length(inds) == Nstep "inds must be exact step index"
+	if tracekey == "time" || tracekey == "frequency"
+		return x.rawfileparsed.time_series[inds...]
+	end
+	return x.rawfileparsed.tracedata[inds...][x.rawfileparsed.tracedict[tracekey], :]
+end
+function Base.getindex(
+		x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
+		tracekey::AbstractString,
+		pairs...) where {Nparam,Nmeas,Nmdim,Nstep}
+
+	stepnames = pairs .|> x->x[1]
+	stepinds = pairs .|> x->x[2]
+
+	pairinds = findfirst.(isequal.(x.stepnames), [stepnames])
+	finalinds = map(pairinds) do ind
+		isnothing(ind) && return (:)
+		return stepinds[ind]
+	end
+
+	if tracekey == "time" || tracekey == "frequency"
+		return x.rawfileparsed.time_series[finalinds...]
+	end
+
+	if length(finalinds) == Nstep
+		return x.rawfileparsed.tracedata[finalinds...][x.rawfileparsed.tracedict[tracekey], :]
+	end
+
+	return map(x.rawfileparsed.tracedata[finalinds...]) do runstep
+		@view runstep[x.rawfileparsed.tracedict[tracekey], :]
+	end
+end
+
 function Base.get(x::LTspiceSimulation, key::AbstractString, default)
 	if haskey(x,key)
 		return(x[key])
@@ -408,6 +488,7 @@ function run!(x::LTspiceSimulation, force=false)
 			end
 		end
 		parselog!(x)
+		parseraw!(x)
 		x.status.ismeasurementsdirty = false
 	end
 end

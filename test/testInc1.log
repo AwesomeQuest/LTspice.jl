@@ -1,6 +1,22 @@
-Circuit: * C:\Users\Chris\.julia\v0.6\LTspice\test\testInc1.asc
-
+LTspice 24.1.9 for Windows
+Circuit: c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testinc1.net
+Start Time: Thu Dec  4 17:07:41 2025
+solver = Normal
+Maximum thread count: 8
+tnom = 27
+temp = 27
+method = trap
 Direct Newton iteration for .op point succeeded.
+Total elapsed time: 0.070 seconds.
+
+Files loaded:
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testinc1.net
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncA.asc
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncB.asc
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncC.asc
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncD.asc
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncE.asc
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\testIncF.asc
 
 inca: a=1
 incb: b=2
@@ -8,22 +24,3 @@ incc: c=3
 incd: d=4
 ince: ee=5
 incf: f=6
-
-
-Date: Thu Jul 06 04:47:36 2017
-Total elapsed time: 0.059 seconds.
-
-tnom = 27
-temp = 27
-method = modified trap
-totiter = 2091
-traniter = 2088
-tranpoints = 1045
-accept = 1045
-rejected = 0
-matrix size = 2
-fillins = 0
-solver = Normal
-Matrix Compiler1: 36 bytes object code size  0.0/0.0/[0.0]
-Matrix Compiler2:       9 opcodes  0.0/[0.0]/0.0
-

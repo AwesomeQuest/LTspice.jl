@@ -1,5 +1,6 @@
 *.net
 *.op
-*.raw
+*.op.raw
+*.log.raw
 *.lnk
 *.db

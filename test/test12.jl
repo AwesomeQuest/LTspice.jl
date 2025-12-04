@@ -1,3 +1,5 @@
+using LTspcie,Test
+
 function test12()
   filename = @__DIR__()*"/test12.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
@@ -13,7 +15,7 @@ function test12()
               8.00000000000001, 9.18958683997629, 10.5560632861832, 
               12.1257325320832, 13.928809012738, 16.0, 
               18.3791736799526, 20.0]
-  bsteps = [1.0, 3.0, 5.0, 7.0, 9.0, 10.0]
+  bsteps = [1.0, 4.0, 7.0, 10.0]
   csteps = [4.0, 5.0, 6.0]
 
   @test stepvalues(sim) == (v1steps, bsteps, csteps)
@@ -29,4 +31,4 @@ function test12()
   show(IOBuffer(),sim)
   return true
 end
-test12()
+@testset test12()

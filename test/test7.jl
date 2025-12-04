@@ -1,3 +1,5 @@
+using LTspcie,Test
+
 function test7()
   filename = @__DIR__()*"/test7.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
@@ -35,4 +37,4 @@ function test7()
   show(IOBuffer(),sim)
   return true
 end
-test7()
+@testset test7()
