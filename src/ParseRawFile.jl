@@ -132,9 +132,9 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 		@error e "An error occured please submit an MWE in an issue"
 	end
 
-	deleteat!(x.rawfileparsed.tracenames, 1)
-	delete!(x.rawfileparsed.tracedict, "time")
-	delete!(x.rawfileparsed.tracedict, "frequency")
+	if !isempty(x.rawfileparsed.tracenames ∩ x.measurementnames)
+		@warn "There are traces with the same name as measurements, this is a bad idea and you should change it"
+	end
 
 	open(x.rawfileparsed.rawpath) do io
 		lastenc = x.rawfileencoding.encodings[x.rawfileencoding.lastcorrectencoding]
