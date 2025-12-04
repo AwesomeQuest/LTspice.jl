@@ -372,38 +372,37 @@ end
 
 function Base.getindex(
 		x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
-		tracekey::AbstractString,
-		inds::Integer...) where {Nparam,Nmeas,Nmdim,Nstep}
-	@assert length(inds) == Nstep "inds must be exact step index"
-	if tracekey == "time" || tracekey == "frequency"
-		return x.rawfileparsed.time_series[inds...]
-	end
-	return x.rawfileparsed.tracedata[inds...][x.rawfileparsed.tracedict[tracekey], :]
-end
-function Base.getindex(
-		x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep},
-		tracekey::AbstractString,
+		key::AbstractString,
 		pairs...) where {Nparam,Nmeas,Nmdim,Nstep}
 
+	run!(x)
 	stepnames = pairs .|> x->x[1]
 	stepinds = pairs .|> x->x[2]
 
+	@assert all(in.(stepnames, [x.stepnames])) "String must be a stepname, one of: $(x.stepnames)"
+	@assert length(stepnames) <= length(x.stepnames) "Cannot have more pairs than stepnames"
+
+	# I'm a little bit proud of this
 	pairinds = findfirst.(isequal.(x.stepnames), [stepnames])
 	finalinds = map(pairinds) do ind
 		isnothing(ind) && return (:)
 		return stepinds[ind]
 	end
 
-	if tracekey == "time" || tracekey == "frequency"
+	# Don't name any measurements the same as traces :p
+	haskey(x.measurementdict, key) && return x.measurementvalues[finalinds..., x.measurementdict[key]]
+
+	# Special case because time is stored elsewhere
+	if key == "time" || key == "frequency"
 		return x.rawfileparsed.time_series[finalinds...]
 	end
 
-	if length(finalinds) == Nstep
-		return x.rawfileparsed.tracedata[finalinds...][x.rawfileparsed.tracedict[tracekey], :]
+	if length(pairs) == Nstep
+		return x.rawfileparsed.tracedata[finalinds...][x.rawfileparsed.tracedict[key], :]
 	end
 
 	return map(x.rawfileparsed.tracedata[finalinds...]) do runstep
-		@view runstep[x.rawfileparsed.tracedict[tracekey], :]
+		@view runstep[x.rawfileparsed.tracedict[key], :]
 	end
 end
 
