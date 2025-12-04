@@ -54,4 +54,4 @@ function test3()
   show(IOBuffer(),sim_b)
   return true
 end
-test3()
+@testset test3()

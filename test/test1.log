@@ -1,15 +1,15 @@
-LTspice 24.1.10 for Windows
-Circuit: c:\Users\torfi\Documents\ProgrammingFun\LTspice.jl\othertests\test1.net
-Start Time: Tue Nov 25 21:11:10 2025
+LTspice 24.1.9 for Windows
+Circuit: c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\test1.net
+Start Time: Thu Dec  4 17:07:01 2025
 solver = Normal
-Maximum thread count: 20
+Maximum thread count: 8
 tnom = 27
 temp = 27
-method = modified trap
+method = trap
 Direct Newton iteration for .op point succeeded.
-Total elapsed time: 0.045 seconds.
+Total elapsed time: 0.067 seconds.
 
 Files loaded:
-c:\Users\torfi\Documents\ProgrammingFun\LTspice.jl\othertests\test1.net
+c:\Users\torfi\Documents\programmingFun\ltspice\LTspice.jl\test\test1.net
 
 current: I(R1)=2.5

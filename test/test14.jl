@@ -1,3 +1,5 @@
+using LTspcie,Test
+
 function test14()
   filename = @__DIR__()*"/test14.asc"
   # exectuablepath = null string will not run LTspice.exe.  Test parsing only.
@@ -9,4 +11,4 @@ function test14()
   sim["m1"] ≈ 493.100006104
   return true
 end
-test14()
+@testset test14()

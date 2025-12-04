@@ -1,3 +1,5 @@
+using LTspcie,Test
+
 function test6()
   filename = @__DIR__()*"/test6.asc"
   exc = ""
@@ -27,4 +29,4 @@ function test6()
   show(IOBuffer(),sim)
   return true
 end
-test6()
+@testset test6()
