@@ -64,6 +64,81 @@ using Optim
 result = optimize(rload -> -example1(rload)[1],10.0,100.0)
 rload_for_maximum_power = example1["Rload"]
 ```
+
+
+To get the values of a trace in a simulation like the voltage at a node simply
+```julia
+example1["V(n001)"]
+```
+
+These are the same names as appear in the plot pane in the LTspice app so if you name a node something like `"output"` then it would be
+```julia
+example1["V(output)"]
+```
+
+Similarly you can get the current through a component like a resistor like
+```julia
+example1["I(R1)"]
+```
+
+And you can get the time steps with 
+```julia
+example1["time"]
+```
+
+If the simulation is stepped like test17 in the test folder
+```julia
+test17 = LTspiceSimulation("test/test17.asc",tempdir=true)
+```
+
+Then you can get the step parameter names and values simply
+```julia
+stepnames(test17)
+# ("ψ", "Φ")
+
+stepvalues(test17)
+# ([1.0e-6, 1.0e-5], [9.0e-10, 2.84604989415154e-9, 9.0e-9, 2.84604989415154e-8, 9.0e-8])
+```
+
+As well as trace names
+```julia
+tracenames(test17)
+7-element Vector{Any}:
+ "time"
+ "V(output)"
+ "V(input)"
+ "I(V1)"
+ "I(C1)"
+ "I(R1)"
+ "I(L1)"
+```
+
+And you can retrive either a measurement or a trace given a step value => index pair
+```julia
+test17["σ", "Φ" => 4, "ψ" => 2]
+# 5.0e-5
+
+test17["I(L1)", "Φ" => 4, "ψ" => 2]
+#=
+192-element Vector{Float32}:
+  0.0
+  ⋮
+ -0.045786228
+=#
+```
+
+You can even not specify a step and it will give you each possible option
+```julia
+test17["I(L1)", "Φ" => 4]
+#=
+2-element Vector{SubArray{Float32, 1, Matrix{Float32}, Tuple{Int64, Base.Slice{Base.OneTo{Int64}}}, true}}:
+ [0.0, -5.6250955f-9, -1.7500096f-8, -6.00001f-8, -2.2000009f-7, -8.400001f-7, -3.2799999f-6, -1.2959998f-5, -3.5245375f-5, -7.416192f-5  …  -0.22722462, -0.22586831, -0.2240625, -0.2218104, -0.2195653, -0.21688215, -0.21376933, -0.21023819, -0.20630342, -0.20413218]   
+ [0.0, -1.7500095f-9, -6.0000094f-9, -2.2000009f-8, -8.400001f-8, -3.28f-7, -1.2959999f-6, -5.1519996f-6, -1.4541428f-5, -3.1994794f-5  …  -0.046235647, -0.04617446, -0.046113048, -0.046060257, -0.046007346, -0.04595434, -0.045901243, -0.045856945, -0.045812603, -0.045786228]
+=#
+```
+Notice that different traces do not necessarily have the same number of elements or time step values
+
+
 ## Supported Platforms
 
 LTspice.jl works on windows and linux with LTspice under wine.  Osx is not supported.

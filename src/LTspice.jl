@@ -12,8 +12,8 @@ include("specialarrays.jl")
 include("LTspiceSimulation.jl")
 include("ParseCircuitFile.jl")
 include("ParseLogFile.jl")
+include("ParseRawFile.jl")
 include("perlineiterator.jl")
 include("utility.jl")
-include("ParseRawFile.jl")
 
 end # module

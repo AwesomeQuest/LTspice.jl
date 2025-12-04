@@ -3,7 +3,7 @@ export circuitpath, logpath, executablepath
 export parameternames, parametervalues
 export measurementnames, measurementvalues
 export stepnames, stepvalues
-export flags, tracedata, tracenames
+export flags, tracenames
 export run!
 
 mutable struct Status
@@ -18,11 +18,19 @@ end
 blankstepvalues(Nstep::Int) = StepValues{Nstep}(ntuple(d->[],Nstep))
 
 """
+		LTspiceSimulation(circuitpath::AbstractString;
+				executablepath::AbstractString = defaultltspiceexecutable(),
+				tempdir::Bool = false
+
+
 Access parameters and measurements of an LTspice simulation.  Runs simulation
 as needed.
 
+# Examples
+
 Access as a dictionary:
 ```julia
+measurement_value = sim["trace_name"]
 measurement_value = sim["measurement_name"]
 parameter_value = sim["parameter_name"]
 sim["parameter_name"] = new_parameter_value
@@ -42,6 +50,12 @@ pvalues = parametervalues(sim)
 mvalues = measurementvalues(sim)
 svalues = stepvalues(sim)
 ```
+
+If the Simulation is stepped access as double dictionary:
+```julia
+measurement_value = sim["measurement_name", "step_name"=>index]
+```
+The `index` parameter corresponds to step value returned by `stepvalues`
 """
 struct LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}
 	circuitpath :: AbstractString
@@ -72,6 +86,8 @@ NonSteppedSimulation{Nparam,Nmeas} = LTspiceSimulation{Nparam,Nmeas,1,0}
 
 Returns an array of the parameters of `sim` in the order they appear in the
 circuit file
+
+See also [`parameternames`](@ref), [`measurementvalues`](@ref), [`stepvalues`](@ref)
 """
 parametervalues
 
@@ -80,6 +96,8 @@ parametervalues
 
 Returns an tuple of the parameters names of `sim` in the order they appear in the
 circuit file.
+
+See also [`parametervalues`](@ref), [`measurementnames`](@ref), [`stepnames`](@ref)
 """
 parameternames
 
@@ -91,6 +109,8 @@ Returns path to the circuit file.
 
 This is the path to the working circuit file.  If `tempdir=ture` was used
 or if running under wine, this will not be the path given to the constructor.
+
+See also [`logpath`](@ref), [`executablepath`](@ref)
 """
 circuitpath
 
@@ -98,6 +118,8 @@ circuitpath
 		logpath(sim)
 
 Returns path to the log file.
+
+See also [`circuitpath`](@ref), [`executablepath`](@ref)
 """
 logpath
 
@@ -105,6 +127,8 @@ logpath
 		executablepath(sim)
 
 Returns path to the LTspice executable
+
+See also [`logpath`](@ref), [`circuitpath`](@ref)
 """
 executablepath
 
@@ -113,6 +137,8 @@ executablepath
 
 Returns an tuple of the measurement names of `sim` in the order they appear in the
 circuit file.
+
+See also [`measurementvalues`](@ref), [`parametervalues`](@ref), [`stepvalues`](@ref)
 """
 measurementnames
 
@@ -120,6 +146,8 @@ measurementnames
 		stepnames(sim)
 
 Returns an tuple of step names of `sim`.
+
+See also [`measurementvalues`](@ref), [`parametervalues`](@ref), [`tracenames`](@ref)
 """
 stepnames
 
@@ -128,6 +156,10 @@ stepnames
 
 Retruns measurements of `sim` as an a array of Float64
 values.
+
+See also [`measurementvalues`](@ref), [`parametervalues`](@ref), [`stepvalues`](@ref)
+
+# Examples
 
 ```julia
 value = measurementvalues(sim)[inner_step,
@@ -143,8 +175,46 @@ measurementvalues
 
 Returns the steps of `sim` as a tuple of three arrays of
 the step values.
+
+See also [`measurementvalues`](@ref), [`tracenames`](@ref), [`stepvalues`](@ref)
 """
 stepvalues
+
+"""
+		flags(sim)
+
+Returns the flags that appear in the raw file stored by the simulation.
+
+See also [`tracenames`](@ref)
+
+- “real” -> The traces in the raw file contain real values. As for exmple on a TRAN simulation.
+- “complex” -> Traces in the raw file contain complex values. As for exmple on an AC simulation.
+- “forward” -> Tells whether the simulation has more than one point. DC transfer characteristic, AC Analysis, Transient Analysis or Noise Spectral Density have the forward flag. Operating Point and Transfer Function don't have this flag activated.
+- “log” -> The preferred plot view of this data is logarithmic.
+- “stepped” -> The simulation had .STEP primitives.
+- “FastAccess” -> Order of the data is changed to speed up access. See Binary section for details.
+
+From https://pyltspice.readthedocs.io/en/latest/varia/raw_file.html
+"""
+flags
+
+"""
+		tracenames(sim)
+
+Returns all possible tracenames that can be passed to `sim`
+
+# Examples
+
+```julia
+sim["trace_name"]
+```
+
+Generaly tracenames have the form I(component) or V(node_name),
+otherwise you use "time" to get the time series
+"""
+tracenames
+
+
 
 circuitpath(x::LTspiceSimulation) = x.circuitpath
 logpath(x::LTspiceSimulation) = x.logpath
@@ -168,10 +238,6 @@ end
 function tracenames(x::LTspiceSimulation)
 	run!(x)
 	x.rawfileparsed.tracenames
-end
-function tracedata(x::LTspiceSimulation)
-	run!(x)
-	x.rawfileparsed.tracedata
 end
 
 LTspiceSimulation(circuitpath::AbstractString;
@@ -422,7 +488,7 @@ function Base.setindex!(x::LTspiceSimulation, value::Float64, key::AbstractStrin
 		throw(KeyError(key))
 	end
 end
-Base.eltype(x::LTspiceSimulation) = Float64
+Base.eltype(x::LTspiceSimulation) = Float64 # Bad Idea?
 Base.length(x::LTspiceSimulation) = length(x.parametervalues) + length(x.measurementvalues)
 
 (x::LTspiceSimulation)(args...) = throw(ArgumentError("number of arguments must match number of parameters"))
@@ -435,13 +501,12 @@ end
 
 
 """
-```julia
-flush(sim)
-```
-Writes `sim`'s circuit file back to disk if any parameters have changed.  The
-user does not usually need to call `flush`.  It will be called automatically
- when a measurement is requested and the log file needs to be updated.  It can be used
- to update a circuit file using julia for simulation with the LTspice GUI.
+		flush(sim)
+
+Writes `sim`'s circuit file back to disk if any parameters have changed.
+The user does not usually need to call `flush`.
+It will be called automatically when a measurement is requested and the log file needs to be updated.
+It can be used to update a circuit file using julia for simulation with the LTspice GUI.
 """
 function Base.flush(x::LTspiceSimulation, force=false)
 	if x.parametervalues.ismodified || force
@@ -468,9 +533,8 @@ function writecircuitfilearray(x::LTspiceSimulation)
 end
 
 """
-```julia
-run!(sim)
-```
+		run(sim)
+
 Writes circuit changes, calls LTspice to run `sim`, and reloads the log file.  The user
 normally does not need to call this.
 """
@@ -487,7 +551,7 @@ function run!(x::LTspiceSimulation, force=false)
 			end
 		end
 		parselog!(x)
-		parseraw!(x)
+		parseraw!(x) # should make optional?
 		x.status.ismeasurementsdirty = false
 	end
 end

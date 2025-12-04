@@ -3,7 +3,7 @@
 """
 		PossibleEncodings
 
-**fields**
+# Fields
 - `encodings`           -- Array of encodings to try
 - `iscorrectencoding`   -- callable object
 - `lastcorrectencoding` -- index of correct encoding last time open was called

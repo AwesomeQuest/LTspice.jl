@@ -1,5 +1,3 @@
-using StringEncodings
-
 export parseraw!
 
 mutable struct RawParsed

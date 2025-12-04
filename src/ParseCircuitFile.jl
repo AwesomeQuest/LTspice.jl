@@ -17,12 +17,6 @@ mutable struct CircuitParsed{T<:AbstractString}
 		new{T}([],[],[],[],[],[],[],nothing,standardcardlist,"","","",[],[])
 end
 
-# LTspice allows multiple directives (cards) in a single block
-# in the GUI, ctrl-M is used to create a new line.
-# this puts a backslash n in the file, NOT a newline character.
-#
-# EachCard is an iterator that separates the lines around the backslash n
-
 #=
 Base.start(::EachCard) = 1
 function Base.next(ec::EachCard, state)
@@ -38,6 +32,13 @@ function Base.next(ec::EachCard, state)
 end
 Base.done(ec::EachCard, state) = state>=lastindex(ec.line)
 =#
+
+"""
+LTspice allows multiple directives (cards) in a single block
+in the GUI, ctrl-M is used to create a new line.
+this puts a backslash n in the file, NOT a newline character.
+EachCard is an iterator that separates the lines around the backslash n
+"""
 struct EachCard{T<:AbstractString}
 	line :: T
 end
