@@ -70,7 +70,7 @@ function parseline!(x::LTspiceSimulation, mv::MeasurementValue, line::AbstractSt
 	return true
 end
 
-const measurementnameregex = r"^Measurement: ([a-z0-9_@#$.:\\]*)"
+const measurementnameregex = r"^Measurement: ([\S_@#$.:\\]*)"
 function parseline!(x::LTspiceSimulation, mn::MeasurementName, line::AbstractString)
 	m = match(measurementnameregex, line)
 	m === nothing && return false
