@@ -119,7 +119,11 @@ const dateregex = r"Start Time:\s*(.*?)\s*$"
 function parseline!(x::LTspiceSimulation, ::Date, line::AbstractString)
 	m = match(dateregex,line)
 	if m!==nothing
-		x.status.timestamp = DateTime(m.captures[1],"e u d HH:MM:SS yyyy")
+		try
+			x.status.timestamp = DateTime(m.captures[1],"e u d HH:MM:SS yyyy")
+		catch
+			x.status.timestamp = DateTime(m.captures[1],"e u  d HH:MM:SS yyyy")
+		end
 		return true
 	else
 		return false
