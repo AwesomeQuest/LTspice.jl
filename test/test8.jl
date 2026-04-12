@@ -1,4 +1,4 @@
-using LTspcie,Test
+using LTspice,Test
 
 function test8()
   filename = @__DIR__()*"/test8.asc"

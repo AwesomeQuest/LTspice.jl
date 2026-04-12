@@ -1,4 +1,4 @@
-using LTspcie,Test
+using LTspice,Test
 
 function test3()
   # copy test3 files to temp so we can test writing to them

@@ -1,4 +1,4 @@
-using LTspcie,Test
+using LTspice,Test
 
 function test10()
   sim = LTspiceSimulation(@__DIR__()*"/test10.asc",executablepath="")
