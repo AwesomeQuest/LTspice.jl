@@ -129,7 +129,8 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 			processlines!(io, x, [Variables()], [Binary()])
 		end
 	catch e
-		@error e "An error occured please submit an MWE in an issue"
+		@error "An error occured please submit an MWE in an issue"
+		@show e
 	end
 
 	deleteat!(x.rawfileparsed.tracenames, 1)
@@ -146,7 +147,7 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 
 		# The first 8 bytes are always the time data
 		rawtime = reshape(reinterpret(Float64, @view data[1:8, :]), :)
-		# LTspcie has a bug that makes time negative sometimes soooo
+		# LTspice has a bug that makes time negative sometimes soooo
 		for i in eachindex(rawtime)
 			if rawtime[i] < 0.0
 				rawtime[i] = abs(rawtime[i])
@@ -160,7 +161,7 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 			T = ComplexF64
 			data = reinterpret(ComplexF64, @view data[17:end, :]) 
 		else
-			# LTspcie can either have single or double precision so we "guess" (not really)
+			# LTspice can either have single or double precision so we "guess" (not really)
 			T = (size(data, 1)-8)÷(x.rawfileparsed.numvars-1) == 4 ? Float32 : Float64
 			data = reinterpret(T, @view data[9:end, :])
 		end
@@ -174,6 +175,12 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 		
 		runindices = x.rawfileparsed.runindices = findall(==(0.0), rawtime[:])
 		@assert length(runindices) == prod(length, x.stepvalues.values)
+		# if there is no time just return the data
+		if length(runindices) == 0
+			x.rawfileparsed.tracedata = data
+			x.rawfileparsed.time_series = rawtime
+			return nothing
+		end
 
 		output = fill(Array{T, 2}(undef,1,1), length.(x.stepvalues.values)...)
 		time = fill([], length.(x.stepvalues.values)...)
