@@ -37,6 +37,7 @@ function defaultltspiceexecutable()
 	end
 	@static if Sys.islinux()
 		possibleltspiceexecutablelocations = [
+		"/home/$(ENV["USER"])/.wine/drive_c/Program Files/ADI/LTspice/LTspice.exe",
 		"/home/$(ENV["USER"])/.wine/drive_c/Program Files/LTC/LTspiceXVII/XVIIx64.exe",
 		"/home/$(ENV["USER"])/.wine/drive_c/Program Files (x86)/LTC/LTspiceIV/scad3.exe"]
 	end
