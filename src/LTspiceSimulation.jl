@@ -63,6 +63,7 @@ struct LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}
 	logfileencoding
 	rawfileencoding
 	rawfileparsed
+	wine_debug :: Union{Nothing,AbstractString}
 end
 NonSteppedSimulation{Nparam,Nmeas} = LTspiceSimulation{Nparam,Nmeas,1,0}
 
@@ -175,14 +176,16 @@ function tracedata(x::LTspiceSimulation)
 end
 
 LTspiceSimulation(circuitpath::AbstractString;
-				executablepath::AbstractString = defaultltspiceexecutable(),
-				tempdir::Bool = false,
-				librarysearchpaths = []) =
-	LTspiceSimulation(circuitpath, executablepath, tempdir, librarysearchpaths)
+					executablepath::AbstractString = defaultltspiceexecutable(),
+					tempdir::Bool = false,
+					librarysearchpaths = [],
+					wine_debug::Union{Nothing,AbstractString} = "-all") =
+		LTspiceSimulation(circuitpath, executablepath, tempdir, librarysearchpaths, wine_debug)
 function LTspiceSimulation(circuitpath::AbstractString,
-						executablepath::AbstractString,
-						istempdir::Bool,
-						librarysearhpaths)
+							executablepath::AbstractString,
+							istempdir::Bool,
+							librarysearhpaths,
+							wine_debug::Union{Nothing,AbstractString})
 	originalcircuitpath = circuitpath
 	if istempdir
 		circuitpath = preparetempdir(circuitpath, executablepath)
@@ -229,7 +232,8 @@ function LTspiceSimulation(circuitpath::AbstractString,
 		circuitparsed.circuitfileencoding,
 		PossibleEncodings([enc"UTF-16LE",enc"UTF-8",enc"windows-1252"],iscorrectencoding_logfile), # logfileencoding(executablepath) # LTspice changed?
 		PossibleEncodings([enc"UTF-16LE",enc"UTF-8",enc"windows-1252"],iscorrectencoding_rawfile), # logfileencoding(executablepath) # LTspice changed?
-		temprawparsed
+		temprawparsed,
+		wine_debug
 	)
 end
 
@@ -482,7 +486,11 @@ function run!(x::LTspiceSimulation, force=false)
 			@static if Sys.islinux()
 				drive_c = "/home/$(ENV["USER"])/.wine/drive_c"
 				winecircuitpath = joinpath("C:",relpath(x.circuitpath,drive_c))
-				run(`wine $(x.executablepath) -b -Run $winecircuitpath`)
+				wine_command = `wine $(x.executablepath) -b -Run $winecircuitpath`
+				if x.wine_debug !== nothing
+					wine_command = addenv(wine_command, "WINEDEBUG" => x.wine_debug)
+				end
+				run(wine_command)
 			else
 				run(`$(x.executablepath) -b -Run $(x.circuitpath)`)
 			end
