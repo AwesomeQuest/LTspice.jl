@@ -34,6 +34,24 @@ function iscorrectencoding_rawfile(io)
 	end
 end
 
+const RAW_HEADER_ENCODINGS = [enc"UTF-16LE", enc"UTF-8", enc"windows-1252"]
+
+function detect_raw_header_encoding(io::IO; encodings=RAW_HEADER_ENCODINGS)
+	initial_position = position(io)
+	prefix = read(io, 256)
+	seek(io, initial_position)
+
+	for encoding in encodings
+		title_marker = encode("Title: ", encoding)
+		if length(prefix) >= length(title_marker) &&
+			@view(prefix[1:length(title_marker)]) == title_marker
+			return encoding
+		end
+	end
+
+	throw(ArgumentError("raw-file header does not begin with a supported encoding of 'Title: '"))
+end
+
 function tryopen!(fname::AbstractString, enc::PossibleEncodings, i)
 	try_io = open(fname,enc.encodings[i])
 	if try_io!==nothing

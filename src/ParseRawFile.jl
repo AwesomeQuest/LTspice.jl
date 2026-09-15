@@ -94,11 +94,11 @@ function parseline!(x::LTspiceSimulation, ::Offset, line::AbstractString)
 end
 
 const varlabelregex = r"^Variables:.*$"
-const varentryregex = r"^\s*(\d)\s*([\w\(\)]+)\s*(\w+)$"
+const varentryregex = r"^\s*(\d+)\s*([\w\(\)]+)\s*(\w+)$"
 function parseline!(x::LTspiceSimulation, ::Variables, line::AbstractString)
 	m = match(varlabelregex,line)
 	m !== nothing && return true
-	
+
 	m = match(varentryregex,line)
 	m === nothing && return false
 
@@ -120,27 +120,25 @@ end
 
 
 function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam,Nmeas,Nmdim,Nstep}
-	try
-		open(x.rawfileparsed.rawpath, x.rawfileencoding) do io
-			# I'm just copying the pattern as the log parser
-			processlines!(io, x, [RawDate()], [Flags()])
-			processlines!(io, x, [NoVariables()], [Points()])
-			processlines!(io, x, [Offset()], [Variables()])
-			processlines!(io, x, [Variables()], [Binary()])
-		end
-	catch e
-		@error "An error occured please submit an MWE in an issue"
-		@show e
-	end
+    headerio, encoding = open(x.rawfileparsed.rawpath) do io
+        local encoding = detect_raw_header_encoding(io)
+        delimiter = encode("Binary:\n", encoding)
+        header = decode(readuntil(io, delimiter, keep=true), encoding)
+        endswith(header, "Binary:\n") || error("Raw file does not contain a Binary section: $(x.rawfileparsed.rawpath)")
+        IOBuffer(header), encoding
+    end
+	processlines!(headerio, x, [RawDate()], [Flags()])
+	processlines!(headerio, x, [NoVariables()], [Points()])
+	processlines!(headerio, x, [Offset()], [Variables()])
+	processlines!(headerio, x, [Variables()], [Binary()])
+	close(headerio)
 
 	deleteat!(x.rawfileparsed.tracenames, 1)
 	delete!(x.rawfileparsed.tracedict, "time")
 	delete!(x.rawfileparsed.tracedict, "frequency")
 
 	open(x.rawfileparsed.rawpath) do io
-		lastenc = x.rawfileencoding.encodings[x.rawfileencoding.lastcorrectencoding]
-		
-		readuntil(io, encode("Binary:\n", lastenc))
+		readuntil(io, encode("Binary:\n", encoding))
 		data = read(io)
 		# Julia is column major order so each data point is one column
 		data = reshape(data, :, x.rawfileparsed.numpoints)
@@ -159,7 +157,7 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 		if "complex" in x.rawfileparsed.flags
 			# If the data has complex number values it inserts a row of zeros after time
 			T = ComplexF64
-			data = reinterpret(ComplexF64, @view data[17:end, :]) 
+			data = reinterpret(ComplexF64, @view data[17:end, :])
 		else
 			# LTspice can either have single or double precision so we "guess" (not really)
 			T = (size(data, 1)-8)÷(x.rawfileparsed.numvars-1) == 4 ? Float32 : Float64
@@ -172,7 +170,7 @@ function parseraw!(x::LTspiceSimulation{Nparam,Nmeas,Nmdim,Nstep}) where {Nparam
 			x.rawfileparsed.time_series = rawtime
 			return nothing
 		end
-		
+
 		runindices = x.rawfileparsed.runindices = findall(==(0.0), rawtime[:])
 		@assert length(runindices) == prod(length, x.stepvalues.values)
 		# if there is no time just return the data
