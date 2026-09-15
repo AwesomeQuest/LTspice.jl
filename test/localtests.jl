@@ -4,11 +4,45 @@ using Test
 
 function localtests()
 
-  test1 = LTspiceSimulation(@__DIR__()*"/test1.asc",tempdir=true)
+  test1path = joinpath(@__DIR__, "test1.asc")
+  test1 = LTspiceSimulation(test1path,tempdir=true)
   v = 20.0
   r = 2.0
   i = test1(v,r)[1]
   @test i == 10.0
+
+  @testset "simulate added component" begin
+    baseline = LTspiceSimulation(test1path,tempdir=true)
+    baseline_current = baseline["Current"]
+    @test baseline_current == 2.5
+
+    circuit = readcircuit(test1path)
+    source = component(circuit,"V1")
+    added_resistor = addcomponent!(
+      circuit,
+      "res",
+      "R2",
+      "10";
+      position=(384,96),
+      orientation="R0",
+    )
+    connect!(circuit,source[1],added_resistor[1])
+    connect!(circuit,source[2],added_resistor[2])
+    adddirective!(
+      circuit,
+      ".MEASURE TRAN Current2 PARAM I(R2)";
+      position=(304,0),
+    )
+
+    mktempdir() do directory
+      generatedpath = joinpath(directory,"generated.asc")
+      writecircuit(generatedpath,circuit)
+
+      generated = LTspiceSimulation(generatedpath,tempdir=true)
+      @test generated["Current"] == baseline_current
+      @test generated["Current2"] == 0.5
+    end
+  end
 
   testinc1 = LTspiceSimulation(@__DIR__()*"/testInc1.asc",tempdir=true)
   @test testinc1["incA"] == 1.0
