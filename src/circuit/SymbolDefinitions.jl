@@ -1,6 +1,6 @@
 export SymbolPin, SymbolDefinition, SymbolLibrary
 export default_symbol_search_paths, find_symbol_definition
-export read_symbol_definition, load_symbol_definition, pin_position
+export read_symbol_definition, load_symbol_definition, pin_position, symbol_bounds
 
 """
 A pin declared by an LTspice `.asy` symbol definition.
@@ -16,11 +16,27 @@ end
 
 """
 A parsed LTspice `.asy` symbol definition.
+
+`bounds` is `(left, top, right, bottom)` in coordinates relative to the symbol
+origin. It encloses the symbol's graphical primitives and pin anchors.
 """
 struct SymbolDefinition
     name::String
     path::String
     pins::Vector{SymbolPin}
+    bounds::NTuple{4,Int}
+end
+
+function SymbolDefinition(name::String, path::String, pins::Vector{SymbolPin})
+    isempty(pins) && throw(ArgumentError("cannot infer symbol bounds without pins"))
+    xs = first.(getfield.(pins, :position))
+    ys = last.(getfield.(pins, :position))
+    return SymbolDefinition(
+        name,
+        path,
+        pins,
+        (minimum(xs), minimum(ys), maximum(xs), maximum(ys)),
+    )
 end
 
 """
@@ -301,16 +317,44 @@ function _finish_pin!(
     push!(pins, SymbolPin(pending.position, pending.name, pending.spice_order))
 end
 
+function _append_symbol_bound_points!(
+    points::Vector{NTuple{2,Int}},
+    fields,
+    path::AbstractString,
+)
+    record_type = fields[1]
+
+    if record_type == "PIN"
+        length(fields) >= 3 ||
+            throw(ArgumentError("Malformed PIN record in symbol definition: $path"))
+        push!(points, (parse(Int, fields[2]), parse(Int, fields[3])))
+    elseif record_type in ("LINE", "RECTANGLE", "CIRCLE", "ARC")
+        length(fields) >= 6 ||
+            throw(ArgumentError(
+                "Malformed $record_type record in symbol definition: $path",
+            ))
+        push!(points, (parse(Int, fields[3]), parse(Int, fields[4])))
+        push!(points, (parse(Int, fields[5]), parse(Int, fields[6])))
+    end
+
+    return points
+end
+
 """
     read_symbol_definition(path) -> SymbolDefinition
 
-Parse pin positions, names, and SPICE terminal ordering from an LTspice `.asy`
-symbol definition.
+Parse graphical bounds, pin positions, names, and SPICE terminal ordering from
+an LTspice `.asy` symbol definition.
+
+Bounds include `LINE`, `RECTANGLE`, `CIRCLE`, and `ARC` records as well as pin
+anchor positions. Text is excluded because symbol files do not store reliable
+rendered text extents.
 """
 function read_symbol_definition(path::AbstractString)
     isfile(path) || throw(ArgumentError("symbol definition does not exist: $path"))
 
     pins = SymbolPin[]
+    bound_points = NTuple{2,Int}[]
     pending = nothing
 
     encoding = circuitfileencoding(path)
@@ -318,6 +362,7 @@ function read_symbol_definition(path::AbstractString)
         for line in eachline(io)
             fields = split(strip(line))
             isempty(fields) && continue
+            _append_symbol_bound_points!(bound_points, fields, path)
 
             if fields[1] == "PIN"
                 length(fields) >= 3 ||
@@ -349,7 +394,19 @@ function read_symbol_definition(path::AbstractString)
     isempty(pins) && throw(ArgumentError("symbol definition contains no pins: $path"))
     sort!(pins; by=pin -> pin.spice_order)
 
-    return SymbolDefinition(splitext(basename(path))[1], abspath(path), pins)
+    bounds = (
+        minimum(first, bound_points),
+        minimum(last, bound_points),
+        maximum(first, bound_points),
+        maximum(last, bound_points),
+    )
+
+    return SymbolDefinition(
+        splitext(basename(path))[1],
+        abspath(path),
+        pins,
+        bounds,
+    )
 end
 
 """
@@ -379,6 +436,30 @@ function _transform_symbol_position(
     orientation == "M180" && return (x, -y)
     orientation == "M270" && return (-y, -x)
     throw(ArgumentError("unsupported LTspice orientation: $orientation"))
+end
+
+"""
+    symbol_bounds(definition, orientation="R0") -> NTuple{4,Int}
+
+Return `(left, top, right, bottom)` for a symbol after applying an LTspice
+rotation or mirror orientation. Coordinates remain relative to the symbol
+origin.
+"""
+function symbol_bounds(
+    definition::SymbolDefinition,
+    orientation::Union{Symbol,AbstractString}="R0",
+)
+    left, top, right, bottom = definition.bounds
+    orientation_name = string(orientation)
+    corners = (
+        _transform_symbol_position((left, top), orientation_name),
+        _transform_symbol_position((right, top), orientation_name),
+        _transform_symbol_position((right, bottom), orientation_name),
+        _transform_symbol_position((left, bottom), orientation_name),
+    )
+    xs = first.(corners)
+    ys = last.(corners)
+    return (minimum(xs), minimum(ys), maximum(xs), maximum(ys))
 end
 
 """
