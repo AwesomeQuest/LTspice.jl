@@ -6,6 +6,8 @@ using Dates
   @testset "/symboldefinitions.jl" include(@__DIR__()*"/symboldefinitions.jl")
   @testset "/installed_examples_symbols.jl" include(@__DIR__()*"/installed_examples_symbols.jl")
   @testset "/editcircuit.jl" include(@__DIR__()*"/editcircuit.jl")
+  @testset "/circuittopology.jl" include(@__DIR__()*"/circuittopology.jl")
+  @testset "/graphsext.jl" include(@__DIR__()*"/graphsext.jl")
   @testset "/test1.jl" include(@__DIR__()*"/test1.jl")
   @testset "/test2.jl" include(@__DIR__()*"/test2.jl")
   @testset "/test3.jl" include(@__DIR__()*"/test3.jl")

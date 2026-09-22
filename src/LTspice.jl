@@ -7,15 +7,16 @@ using StringEncodings
 using Dates: DateTime
 import IterTools.chain
 
-include("open_with_unknown_encoding.jl")
-include("specialarrays.jl")
-include("LTspiceSimulation.jl")
-include("ParseCircuitFile.jl")
-include("SymbolDefinitions.jl")
-include("EditCircuit.jl")
-include("ParseLogFile.jl")
-include("perlineiterator.jl")
-include("utility.jl")
-include("ParseRawFile.jl")
+include("simulation/open_with_unknown_encoding.jl")
+include("simulation/specialarrays.jl")
+include("simulation/LTspiceSimulation.jl")
+include("simulation/ParseCircuitFile.jl")
+include("circuit/SymbolDefinitions.jl")
+include("circuit/EditCircuit.jl")
+include("circuit/CircuitTopology.jl")
+include("simulation/ParseLogFile.jl")
+include("simulation/perlineiterator.jl")
+include("simulation/utility.jl")
+include("simulation/ParseRawFile.jl")
 
 end # module
